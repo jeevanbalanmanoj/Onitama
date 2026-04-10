@@ -8,6 +8,7 @@ interface CardPanelProps {
   currentPlayer: Player;
   isPlayerTurn: (player: Player) => boolean;
   onSelectCard: (card: Card) => void;
+  flipped?: boolean;
 }
 
 export default function CardPanel({
@@ -16,19 +17,23 @@ export default function CardPanel({
   currentPlayer,
   isPlayerTurn,
   onSelectCard,
+  flipped = false,
 }: CardPanelProps) {
+  const topPlayer: Player = flipped ? 'red' : 'blue';
+  const bottomPlayer: Player = flipped ? 'blue' : 'red';
+
   return (
     <div className="flex flex-col items-center gap-4">
-      {/* Blue's cards (top) */}
+      {/* Top player's cards */}
       <div className="flex flex-col items-center gap-1">
-        <span className="text-xs font-medium text-blue-700/70 uppercase tracking-wider">
-          Blue {currentPlayer === 'blue' ? '• Turn' : ''}
+        <span className={`text-xs font-medium uppercase tracking-wider ${topPlayer === 'blue' ? 'text-blue-700/70' : 'text-red-700/70'}`}>
+          {topPlayer === 'blue' ? 'Blue' : 'Red'} {currentPlayer === topPlayer ? '• Turn' : ''}
         </span>
         <CardHand
-          cards={state.blueCards}
-          player="blue"
-          selectedCardName={currentPlayer === 'blue' ? selectedCardName : null}
-          isActive={isPlayerTurn('blue')}
+          cards={topPlayer === 'blue' ? state.blueCards : state.redCards}
+          player={topPlayer}
+          selectedCardName={currentPlayer === topPlayer ? selectedCardName : null}
+          isActive={isPlayerTurn(topPlayer)}
           onSelectCard={onSelectCard}
         />
       </div>
@@ -47,16 +52,16 @@ export default function CardPanel({
         />
       </div>
 
-      {/* Red's cards (bottom) */}
+      {/* Bottom player's cards */}
       <div className="flex flex-col items-center gap-1">
-        <span className="text-xs font-medium text-red-700/70 uppercase tracking-wider">
-          Red {currentPlayer === 'red' ? '• Turn' : ''}
+        <span className={`text-xs font-medium uppercase tracking-wider ${bottomPlayer === 'red' ? 'text-red-700/70' : 'text-blue-700/70'}`}>
+          {bottomPlayer === 'blue' ? 'Blue' : 'Red'} {currentPlayer === bottomPlayer ? '• Turn' : ''}
         </span>
         <CardHand
-          cards={state.redCards}
-          player="red"
-          selectedCardName={currentPlayer === 'red' ? selectedCardName : null}
-          isActive={isPlayerTurn('red')}
+          cards={bottomPlayer === 'red' ? state.redCards : state.blueCards}
+          player={bottomPlayer}
+          selectedCardName={currentPlayer === bottomPlayer ? selectedCardName : null}
+          isActive={isPlayerTurn(bottomPlayer)}
           onSelectCard={onSelectCard}
         />
       </div>

@@ -66,6 +66,7 @@ export default function App() {
     const gs = online.gameState;
     const isMyTurn = gs.currentPlayer === online.playerColor && !gs.winner;
     const currentCards = gs.currentPlayer === 'red' ? gs.redCards : gs.blueCards;
+    const onlineFlipped = online.playerColor === 'blue';
 
     const isPlayerTurnOnline = (player: Player): boolean => {
       if (gs.winner) return false;
@@ -121,6 +122,7 @@ export default function App() {
                 selectedPieceIndex={online.selectedPieceIndex}
                 validTargets={online.validTargets}
                 onSquareClick={online.actions.selectSquare}
+                flipped={onlineFlipped}
               />
 
               {/* Must-pass indicator */}
@@ -149,6 +151,7 @@ export default function App() {
                 currentPlayer={gs.currentPlayer}
                 isPlayerTurn={isPlayerTurnOnline}
                 onSelectCard={online.actions.selectCard}
+                flipped={onlineFlipped}
               />
             </div>
           </div>

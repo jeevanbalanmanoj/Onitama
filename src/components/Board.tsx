@@ -6,9 +6,10 @@ interface BoardProps {
   selectedPieceIndex: number | null;
   validTargets: Position[];
   onSquareClick: (row: number, col: number) => void;
+  flipped?: boolean;
 }
 
-export default function Board({ state, selectedPieceIndex, validTargets, onSquareClick }: BoardProps) {
+export default function Board({ state, selectedPieceIndex, validTargets, onSquareClick, flipped = false }: BoardProps) {
   const isValidTarget = (row: number, col: number) =>
     validTargets.some((t) => t.row === row && t.col === col);
 
@@ -18,8 +19,10 @@ export default function Board({ state, selectedPieceIndex, validTargets, onSquar
     return piece && piece.row === row && piece.col === col;
   };
 
-  const colLabels = ['a', 'b', 'c', 'd', 'e'];
-  const rowLabels = ['5', '4', '3', '2', '1']; // top row = 5, bottom = 1
+  const colLabels = flipped ? ['e', 'd', 'c', 'b', 'a'] : ['a', 'b', 'c', 'd', 'e'];
+  const rowLabels = flipped ? ['1', '2', '3', '4', '5'] : ['5', '4', '3', '2', '1'];
+  const rowOrder = flipped ? [4, 3, 2, 1, 0] : [0, 1, 2, 3, 4];
+  const colOrder = flipped ? [4, 3, 2, 1, 0] : [0, 1, 2, 3, 4];
 
   return (
     <div className="flex flex-col items-center w-full max-w-[400px]">
@@ -40,8 +43,8 @@ export default function Board({ state, selectedPieceIndex, validTargets, onSquar
 
         {/* Board grid */}
         <div className="grid grid-cols-5 gap-0 flex-1 aspect-square border-2 border-amber-800/40 rounded-lg overflow-hidden shadow-xl bg-amber-900/5">
-          {Array.from({ length: 5 }, (_, row) =>
-            Array.from({ length: 5 }, (_, col) => (
+          {rowOrder.map((row) =>
+            colOrder.map((col) => (
               <Square
                 key={`${row}-${col}`}
                 row={row}

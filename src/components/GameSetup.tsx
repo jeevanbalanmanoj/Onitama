@@ -188,7 +188,7 @@ export default function GameSetup({ onStart }: GameSetupProps) {
             <div className="h-px w-12 bg-amber-800/20" />
           </div>
           <p className="text-xs text-amber-800/35 mt-2 leading-relaxed">
-            Capture the opponent's Master or move your Master to their Temple
+            Capture the opponent's Master or move your Master to their Temple!
           </p>
         </div>
 

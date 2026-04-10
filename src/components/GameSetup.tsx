@@ -177,7 +177,7 @@ export default function GameSetup({ onStart }: GameSetupProps) {
 
       <div className="max-w-sm w-full relative z-10">
         {/* Title */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h1 className="text-7xl font-bold text-amber-900 mb-3 tracking-wide" style={{ fontFamily: '"Noto Serif JP", serif' }}>
             Onitama
           </h1>
@@ -194,7 +194,7 @@ export default function GameSetup({ onStart }: GameSetupProps) {
         </div>
 
         {/* Mode Selection — modern toggle-style */}
-        <div className="space-y-5">
+        <div className="space-y-3">
           <button
             onClick={() => setMode('ai')}
             className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-200 border ${
@@ -212,48 +212,34 @@ export default function GameSetup({ onStart }: GameSetupProps) {
             </div>
           </button>
 
-          {/* AI Difficulty */}
+          {/* AI Difficulty + Color */}
           {mode === 'ai' && (
-            <div className="space-y-2 px-1">
-              <div className="flex gap-2">
-                {(['easy', 'medium', 'hard'] as AIDifficulty[]).map((d) => (
-                  <button
-                    key={d}
-                    onClick={() => setDifficulty(d)}
-                    className={`flex-1 py-2.5 rounded-xl font-medium text-sm capitalize transition-all duration-200 border ${
-                      difficulty === d
-                        ? 'bg-red-800 text-white border-red-800 shadow-md'
-                        : 'bg-white/40 text-amber-800 border-amber-200/50 hover:border-amber-300'
-                    }`}
-                  >
-                    {d}
-                  </button>
-                ))}
-              </div>
-              <div className="flex gap-2">
+            <div className="flex gap-2 px-1">
+              {(['easy', 'medium', 'hard'] as AIDifficulty[]).map((d) => (
                 <button
-                  onClick={() => setHumanColor('red')}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl font-medium text-sm transition-all duration-200 border ${
-                    humanColor === 'red'
-                      ? 'bg-red-700 text-white border-red-700 shadow-md'
+                  key={d}
+                  onClick={() => setDifficulty(d)}
+                  className={`flex-1 py-2 rounded-xl font-medium text-sm capitalize transition-all duration-200 border ${
+                    difficulty === d
+                      ? 'bg-red-800 text-white border-red-800 shadow-md'
                       : 'bg-white/40 text-amber-800 border-amber-200/50 hover:border-amber-300'
                   }`}
                 >
-                  <span className={`w-3 h-3 rounded-full ${humanColor === 'red' ? 'bg-red-300' : 'bg-red-400/60'}`} />
-                  Play as Red
+                  {d}
                 </button>
-                <button
-                  onClick={() => setHumanColor('blue')}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl font-medium text-sm transition-all duration-200 border ${
-                    humanColor === 'blue'
-                      ? 'bg-blue-700 text-white border-blue-700 shadow-md'
-                      : 'bg-white/40 text-amber-800 border-amber-200/50 hover:border-amber-300'
-                  }`}
-                >
-                  <span className={`w-3 h-3 rounded-full ${humanColor === 'blue' ? 'bg-blue-300' : 'bg-blue-400/60'}`} />
-                  Play as Blue
-                </button>
-              </div>
+              ))}
+              <div className="w-px bg-amber-200/50 mx-0.5" />
+              <button
+                onClick={() => setHumanColor(humanColor === 'red' ? 'blue' : 'red')}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl font-medium text-xs transition-all duration-200 border whitespace-nowrap ${
+                  humanColor === 'red'
+                    ? 'bg-red-700 text-white border-red-700 shadow-md'
+                    : 'bg-blue-700 text-white border-blue-700 shadow-md'
+                }`}
+              >
+                <span className={`w-2.5 h-2.5 rounded-full ${humanColor === 'red' ? 'bg-red-300' : 'bg-blue-300'}`} />
+                {humanColor === 'red' ? 'Red' : 'Blue'}
+              </button>
             </div>
           )}
 

@@ -17,6 +17,16 @@
   border-radius: 2px;
 }
 
+/* Subtle Japanese seigaiha (wave) background pattern */
+.bg-seigaiha {
+  background-color: #fdf6e3;
+  background-image:
+    radial-gradient(circle at 50% 100%, transparent 32%, rgba(180, 140, 80, 0.035) 33%, rgba(180, 140, 80, 0.035) 34%, transparent 35%),
+    radial-gradient(circle at 50% 100%, transparent 52%, rgba(180, 140, 80, 0.03) 53%, rgba(180, 140, 80, 0.03) 54%, transparent 55%),
+    radial-gradient(circle at 50% 100%, transparent 72%, rgba(180, 140, 80, 0.025) 73%, rgba(180, 140, 80, 0.025) 74%, transparent 75%);
+  background-size: 56px 28px;
+}
+
 /* Base styles */
 body {
   margin: 0;

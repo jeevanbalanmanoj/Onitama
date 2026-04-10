@@ -37,7 +37,7 @@ export default function App() {
     gameState.currentPlayer === 'red' ? gameState.redCards : gameState.blueCards;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100/80 flex flex-col">
+    <div className="min-h-screen bg-seigaiha flex flex-col">
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3 border-b border-amber-200/50 bg-white/30 backdrop-blur-sm">
         <h1 className="text-2xl font-bold text-amber-900 tracking-wide">

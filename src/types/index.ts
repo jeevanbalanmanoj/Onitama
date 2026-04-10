@@ -44,5 +44,5 @@ export interface GameState {
   moveHistory: Move[];
 }
 
-export type GameMode = 'local' | 'ai';
+export type GameMode = 'local' | 'ai' | 'online';
 export type AIDifficulty = 'easy' | 'medium' | 'hard';

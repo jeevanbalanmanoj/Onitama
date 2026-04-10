@@ -38,6 +38,18 @@ function BrainIcon({ className }: { className?: string }) {
   );
 }
 
+function GlobeIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <ellipse cx="12" cy="12" rx="4" ry="10" />
+      <path d="M2 12h20" />
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10" />
+      <path d="M12 2a15.3 15.3 0 0 0-4 10 15.3 15.3 0 0 0 4 10" />
+    </svg>
+  );
+}
+
 export default function GameSetup({ onStart }: GameSetupProps) {
   const [mode, setMode] = useState<GameMode>('ai');
   const [difficulty, setDifficulty] = useState<AIDifficulty>('medium');
@@ -152,6 +164,23 @@ export default function GameSetup({ onStart }: GameSetupProps) {
               <div className="font-semibold text-base">Local Multiplayer</div>
               <div className={`text-xs mt-0.5 ${mode === 'local' ? 'text-amber-200/70' : 'text-amber-700/40'}`}>
                 Two players, one device
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setMode('online')}
+            className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-200 border ${
+              mode === 'online'
+                ? 'bg-amber-900 text-amber-50 border-amber-900 shadow-lg shadow-amber-900/20'
+                : 'bg-white/50 text-amber-900 border-amber-200/60 hover:bg-white/70 hover:border-amber-300/80'
+            }`}
+          >
+            <GlobeIcon className={`w-8 h-8 shrink-0 ${mode === 'online' ? 'text-amber-200' : 'text-amber-700/60'}`} />
+            <div className="text-left">
+              <div className="font-semibold text-base">Online Multiplayer</div>
+              <div className={`text-xs mt-0.5 ${mode === 'online' ? 'text-amber-200/70' : 'text-amber-700/40'}`}>
+                Play with a friend via link
               </div>
             </div>
           </button>

@@ -238,7 +238,7 @@ export default function GameSetup({ onStart }: GameSetupProps) {
                 }`}
               >
                 <span className={`w-2.5 h-2.5 rounded-full ${humanColor === 'red' ? 'bg-red-300' : 'bg-blue-300'}`} />
-                {humanColor === 'red' ? 'Red' : 'Blue'}
+                Play as {humanColor === 'red' ? 'Red' : 'Blue'}
               </button>
             </div>
           )}

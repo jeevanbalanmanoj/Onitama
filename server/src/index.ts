@@ -40,7 +40,7 @@ setInterval(cleanupStaleRooms, 10 * 60 * 1000);
 io.on('connection', (socket) => {
   console.log(`Connected: ${socket.id}`);
 
-  socket.on('create_room', () => {
+  socket.on('create_room', (data) => {
     // Leave any existing room first
     const existing = getRoomBySocket(socket.id);
     if (existing) {
@@ -48,11 +48,12 @@ io.on('connection', (socket) => {
       removeRoom(existing.code);
     }
 
-    const room = createRoom(socket.id);
+    const preferredColor = data?.preferredColor === 'blue' ? 'blue' : 'red';
+    const room = createRoom(socket.id, preferredColor);
     socket.join(room.code);
     socket.emit('room_created', { roomCode: room.code });
     socket.emit('waiting_for_opponent');
-    console.log(`Room created: ${room.code} by ${socket.id}`);
+    console.log(`Room created: ${room.code} by ${socket.id} (${preferredColor})`);
   });
 
   socket.on('join_room', ({ roomCode }) => {

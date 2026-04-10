@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { Player } from '../types';
 import type { ConnectionStatus, LobbyStatus } from '../types/online';
 
 interface OnlineLobbyProps {
@@ -6,7 +7,7 @@ interface OnlineLobbyProps {
   connectionStatus: ConnectionStatus;
   lobbyStatus: LobbyStatus;
   errorMessage: string | null;
-  onCreateRoom: () => void;
+  onCreateRoom: (preferredColor?: Player) => void;
   onJoinRoom: (code: string) => void;
   onBack: () => void;
 }
@@ -22,6 +23,7 @@ export default function OnlineLobby({
 }: OnlineLobbyProps) {
   const [joinCode, setJoinCode] = useState('');
   const [copied, setCopied] = useState(false);
+  const [preferredColor, setPreferredColor] = useState<Player>('red');
 
   const shareUrl = roomCode
     ? `${window.location.origin}${window.location.pathname}?room=${roomCode}`
@@ -126,7 +128,7 @@ export default function OnlineLobby({
         <div className="space-y-5">
           {/* Create room */}
           <button
-            onClick={onCreateRoom}
+            onClick={() => onCreateRoom(preferredColor)}
             disabled={lobbyStatus === 'creating'}
             className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl bg-amber-900 text-amber-50 border border-amber-900 shadow-lg shadow-amber-900/20 transition-all duration-200 hover:bg-amber-800 disabled:opacity-60"
           >
@@ -140,6 +142,35 @@ export default function OnlineLobby({
               <div className="text-xs text-amber-200/70">Get a code to share</div>
             </div>
           </button>
+
+          {/* Color preference */}
+          <div className="flex items-center justify-center gap-2 px-1">
+            <span className="text-xs text-amber-800/40">Play as</span>
+            <div className="flex rounded-xl overflow-hidden border border-amber-200/50 shadow-sm">
+              <button
+                onClick={() => setPreferredColor('red')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 font-medium text-xs transition-all duration-200 ${
+                  preferredColor === 'red'
+                    ? 'bg-red-700 text-white'
+                    : 'bg-white/40 text-amber-800 hover:bg-white/60'
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${preferredColor === 'red' ? 'bg-red-300' : 'bg-red-400/60'}`} />
+                Red
+              </button>
+              <button
+                onClick={() => setPreferredColor('blue')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 font-medium text-xs transition-all duration-200 ${
+                  preferredColor === 'blue'
+                    ? 'bg-blue-700 text-white'
+                    : 'bg-white/40 text-amber-800 hover:bg-white/60'
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${preferredColor === 'blue' ? 'bg-blue-300' : 'bg-blue-400/60'}`} />
+                Blue
+              </button>
+            </div>
+          </div>
 
           {/* Divider */}
           <div className="flex items-center gap-3">

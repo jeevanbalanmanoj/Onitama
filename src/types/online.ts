@@ -36,7 +36,7 @@ export interface ServerToClientEvents {
 // Client → Server events
 
 export interface ClientToServerEvents {
-  create_room: () => void;
+  create_room: (data?: { preferredColor?: Player }) => void;
   join_room: (data: { roomCode: string }) => void;
   move: (data: MovePayload) => void;
   pass: (data: PassPayload) => void;

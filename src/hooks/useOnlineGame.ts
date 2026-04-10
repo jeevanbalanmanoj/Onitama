@@ -50,7 +50,7 @@ function buildInitialState(
 }
 
 export interface OnlineGameActions {
-  createRoom: () => void;
+  createRoom: (preferredColor?: Player) => void;
   joinRoom: (code: string) => void;
   selectCard: (card: Card) => void;
   selectSquare: (row: number, col: number) => void;
@@ -189,11 +189,11 @@ export function useOnlineGame(): OnlineGameStore {
     };
   }, []);
 
-  const createRoomAction = useCallback(() => {
+  const createRoomAction = useCallback((preferredColor?: Player) => {
     setErrorMessage(null);
     setLobbyStatus('creating');
     const socket = getSocket();
-    socket.emit('create_room');
+    socket.emit('create_room', preferredColor ? { preferredColor } : undefined);
   }, [getSocket]);
 
   const joinRoomAction = useCallback(

@@ -2,10 +2,11 @@ import { shuffleAndDeal, type DealtCards } from './cards.js';
 
 export interface Room {
   code: string;
-  players: string[]; // socket IDs, index 0 = red (creator), index 1 = blue (joiner)
+  players: string[]; // socket IDs
+  playerColors: Map<string, 'red' | 'blue'>; // socket ID -> color
   deal: DealtCards;
   createdAt: number;
-  disconnectedPlayer: string | null; // socket ID of disconnected player (for reconnect)
+  disconnectedPlayer: string | null;
 }
 
 const rooms = new Map<string, Room>();
@@ -23,12 +24,15 @@ function generateCode(): string {
   return code;
 }
 
-export function createRoom(creatorSocketId: string): Room {
+export function createRoom(creatorSocketId: string, preferredColor: 'red' | 'blue' = 'red'): Room {
   const code = generateCode();
   const deal = shuffleAndDeal();
+  const playerColors = new Map<string, 'red' | 'blue'>();
+  playerColors.set(creatorSocketId, preferredColor);
   const room: Room = {
     code,
     players: [creatorSocketId],
+    playerColors,
     deal,
     createdAt: Date.now(),
     disconnectedPlayer: null,
@@ -42,6 +46,9 @@ export function joinRoom(code: string, joinerSocketId: string): Room | null {
   if (!room) return null;
   if (room.players.length >= 2) return null;
   room.players.push(joinerSocketId);
+  // Assign joiner the opposite color of the creator
+  const creatorColor = room.playerColors.get(room.players[0]) || 'red';
+  room.playerColors.set(joinerSocketId, creatorColor === 'red' ? 'blue' : 'red');
   return room;
 }
 
@@ -61,9 +68,7 @@ export function removeRoom(code: string): void {
 }
 
 export function getPlayerColor(room: Room, socketId: string): 'red' | 'blue' | null {
-  if (room.players[0] === socketId) return 'red';
-  if (room.players[1] === socketId) return 'blue';
-  return null;
+  return room.playerColors.get(socketId) ?? null;
 }
 
 export function rematchRoom(room: Room): void {

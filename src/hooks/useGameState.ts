@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import type { AIDifficulty, Card, GameMode, GameState, Move, Position } from '../types';
+import type { AIDifficulty, Card, GameMode, GameState, Move, Player, Position } from '../types';
 import { initGame, applyMove, getValidTargets, canPlayerMove, passWithCard } from '../engine/game';
 import { getAIMove } from '../engine/ai';
 
@@ -8,7 +8,7 @@ export interface GameActions {
   selectSquare: (row: number, col: number) => void;
   undo: () => void;
   resetGame: () => void;
-  startGame: (mode: GameMode, difficulty: AIDifficulty) => void;
+  startGame: (mode: GameMode, difficulty: AIDifficulty, humanColor?: Player) => void;
   passCard: (cardName: string) => void;
 }
 
@@ -19,6 +19,7 @@ export interface GameStore {
   validTargets: Position[];
   gameMode: GameMode;
   aiDifficulty: AIDifficulty;
+  humanColor: Player;
   isAIThinking: boolean;
   isSetup: boolean;
   mustPass: boolean;
@@ -35,6 +36,7 @@ export function useGameState(): GameStore {
   const [isAIThinking, setIsAIThinking] = useState(false);
   const [isSetup, setIsSetup] = useState(true);
   const [mustPass, setMustPass] = useState(false);
+  const [humanColor, setHumanColor] = useState<Player>('red');
   const undoStack = useRef<GameState[]>([]);
   const aiTimeoutRef = useRef<number | null>(null);
 
@@ -53,10 +55,12 @@ export function useGameState(): GameStore {
     setValidTargets([]);
   }, []);
 
+  const aiColor: Player = humanColor === 'red' ? 'blue' : 'red';
+
   const triggerAITurn = useCallback(
     (state: GameState) => {
       if (state.winner) return;
-      if (state.currentPlayer !== 'blue') return;
+      if (state.currentPlayer !== aiColor) return;
 
       setIsAIThinking(true);
       aiTimeoutRef.current = window.setTimeout(() => {
@@ -76,13 +80,14 @@ export function useGameState(): GameStore {
         clearSelection();
       }, 400);
     },
-    [aiDifficulty, clearSelection]
+    [aiDifficulty, aiColor, clearSelection]
   );
 
   const startGame = useCallback(
-    (mode: GameMode, difficulty: AIDifficulty) => {
+    (mode: GameMode, difficulty: AIDifficulty, color: Player = 'red') => {
       setGameMode(mode);
       setAIDifficulty(difficulty);
+      setHumanColor(color);
       const state = initGame();
       setGameState(state);
       undoStack.current = [];
@@ -90,8 +95,9 @@ export function useGameState(): GameStore {
       setIsSetup(false);
       setIsAIThinking(false);
 
-      // If AI mode and blue goes first, trigger AI immediately
-      if (mode === 'ai' && state.currentPlayer === 'blue') {
+      // If AI mode and AI goes first, trigger AI immediately
+      const ai = color === 'red' ? 'blue' : 'red';
+      if (mode === 'ai' && state.currentPlayer === ai) {
         triggerAITurn(state);
       }
     },
@@ -101,7 +107,7 @@ export function useGameState(): GameStore {
   const selectCard = useCallback(
     (card: Card) => {
       if (!gameState || gameState.winner || isAIThinking) return;
-      if (gameMode === 'ai' && gameState.currentPlayer === 'blue') return;
+      if (gameMode === 'ai' && gameState.currentPlayer === aiColor) return;
 
       if (selectedCard?.name === card.name) {
         // Deselect
@@ -119,7 +125,7 @@ export function useGameState(): GameStore {
         setValidTargets([]);
       }
     },
-    [gameState, selectedCard, selectedPieceIndex, isAIThinking, gameMode, clearSelection]
+    [gameState, selectedCard, selectedPieceIndex, isAIThinking, gameMode, aiColor, clearSelection]
   );
 
   const executeMove = useCallback(
@@ -130,7 +136,7 @@ export function useGameState(): GameStore {
       clearSelection();
 
       // Trigger AI turn if applicable
-      if (gameMode === 'ai' && !newState.winner && newState.currentPlayer === 'blue') {
+      if (gameMode === 'ai' && !newState.winner && newState.currentPlayer === aiColor) {
         triggerAITurn(newState);
       }
     },
@@ -140,7 +146,7 @@ export function useGameState(): GameStore {
   const selectSquare = useCallback(
     (row: number, col: number) => {
       if (!gameState || gameState.winner || isAIThinking) return;
-      if (gameMode === 'ai' && gameState.currentPlayer === 'blue') return;
+      if (gameMode === 'ai' && gameState.currentPlayer === aiColor) return;
       if (mustPass) return;
 
       const clickedPiece = gameState.board[row][col];
@@ -198,6 +204,7 @@ export function useGameState(): GameStore {
       gameState,
       isAIThinking,
       gameMode,
+      aiColor,
       mustPass,
       selectedCard,
       selectedPieceIndex,
@@ -216,11 +223,11 @@ export function useGameState(): GameStore {
       setGameState(newState);
       clearSelection();
 
-      if (gameMode === 'ai' && !newState.winner && newState.currentPlayer === 'blue') {
+      if (gameMode === 'ai' && !newState.winner && newState.currentPlayer === aiColor) {
         triggerAITurn(newState);
       }
     },
-    [gameState, isAIThinking, mustPass, gameMode, clearSelection, triggerAITurn]
+    [gameState, isAIThinking, mustPass, gameMode, aiColor, clearSelection, triggerAITurn]
   );
 
   const undo = useCallback(() => {
@@ -262,6 +269,7 @@ export function useGameState(): GameStore {
     validTargets,
     gameMode,
     aiDifficulty,
+    humanColor,
     isAIThinking,
     isSetup,
     mustPass,

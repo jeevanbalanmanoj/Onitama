@@ -202,12 +202,20 @@ export default function App() {
   const isPlayerTurn = (player: Player): boolean => {
     if (gameState.winner || isAIThinking) return false;
     if (gameState.currentPlayer !== player) return false;
-    if (gameMode === 'ai' && player === 'blue') return false;
+    if (gameMode === 'ai' && player !== store.humanColor) return false;
     return true;
   };
 
   const currentCards =
     gameState.currentPlayer === 'red' ? gameState.redCards : gameState.blueCards;
+
+  // Flip board: AI mode when human is blue, local mode when it's blue's turn
+  const localFlipped =
+    gameMode === 'ai'
+      ? store.humanColor === 'blue'
+      : gameMode === 'local'
+        ? gameState.currentPlayer === 'blue'
+        : false;
 
   return (
     <div className="min-h-screen bg-seigaiha flex flex-col">
@@ -259,6 +267,7 @@ export default function App() {
               selectedPieceIndex={selectedPieceIndex}
               validTargets={validTargets}
               onSquareClick={actions.selectSquare}
+              flipped={localFlipped}
             />
 
             {/* Must-pass indicator */}
@@ -288,6 +297,7 @@ export default function App() {
               currentPlayer={gameState.currentPlayer}
               isPlayerTurn={isPlayerTurn}
               onSelectCard={actions.selectCard}
+              flipped={localFlipped}
             />
           </div>
         </div>
@@ -331,7 +341,7 @@ export default function App() {
         <WinOverlay
           winner={gameState.winner}
           winMethod={gameState.winMethod}
-          onPlayAgain={() => actions.startGame(gameMode, store.aiDifficulty)}
+          onPlayAgain={() => actions.startGame(gameMode, store.aiDifficulty, store.humanColor)}
           onBackToMenu={actions.resetGame}
         />
       )}

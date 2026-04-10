@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import type { GameMode, AIDifficulty } from '../types';
+import type { GameMode, AIDifficulty, Player } from '../types';
 
 interface GameSetupProps {
-  onStart: (mode: GameMode, difficulty: AIDifficulty) => void;
+  onStart: (mode: GameMode, difficulty: AIDifficulty, humanColor?: Player) => void;
 }
 
 function SwordsIcon({ className }: { className?: string }) {
@@ -128,6 +128,7 @@ function LearnModal({ onClose }: { onClose: () => void }) {
 export default function GameSetup({ onStart }: GameSetupProps) {
   const [mode, setMode] = useState<GameMode>('ai');
   const [difficulty, setDifficulty] = useState<AIDifficulty>('medium');
+  const [humanColor, setHumanColor] = useState<Player>('red');
   const [showLearn, setShowLearn] = useState(false);
 
   return (
@@ -213,20 +214,46 @@ export default function GameSetup({ onStart }: GameSetupProps) {
 
           {/* AI Difficulty */}
           {mode === 'ai' && (
-            <div className="flex gap-2 px-1">
-              {(['easy', 'medium', 'hard'] as AIDifficulty[]).map((d) => (
+            <div className="space-y-2 px-1">
+              <div className="flex gap-2">
+                {(['easy', 'medium', 'hard'] as AIDifficulty[]).map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setDifficulty(d)}
+                    className={`flex-1 py-2.5 rounded-xl font-medium text-sm capitalize transition-all duration-200 border ${
+                      difficulty === d
+                        ? 'bg-red-800 text-white border-red-800 shadow-md'
+                        : 'bg-white/40 text-amber-800 border-amber-200/50 hover:border-amber-300'
+                    }`}
+                  >
+                    {d}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-2">
                 <button
-                  key={d}
-                  onClick={() => setDifficulty(d)}
-                  className={`flex-1 py-2.5 rounded-xl font-medium text-sm capitalize transition-all duration-200 border ${
-                    difficulty === d
-                      ? 'bg-red-800 text-white border-red-800 shadow-md'
+                  onClick={() => setHumanColor('red')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl font-medium text-sm transition-all duration-200 border ${
+                    humanColor === 'red'
+                      ? 'bg-red-700 text-white border-red-700 shadow-md'
                       : 'bg-white/40 text-amber-800 border-amber-200/50 hover:border-amber-300'
                   }`}
                 >
-                  {d}
+                  <span className={`w-3 h-3 rounded-full ${humanColor === 'red' ? 'bg-red-300' : 'bg-red-400/60'}`} />
+                  Play as Red
                 </button>
-              ))}
+                <button
+                  onClick={() => setHumanColor('blue')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl font-medium text-sm transition-all duration-200 border ${
+                    humanColor === 'blue'
+                      ? 'bg-blue-700 text-white border-blue-700 shadow-md'
+                      : 'bg-white/40 text-amber-800 border-amber-200/50 hover:border-amber-300'
+                  }`}
+                >
+                  <span className={`w-3 h-3 rounded-full ${humanColor === 'blue' ? 'bg-blue-300' : 'bg-blue-400/60'}`} />
+                  Play as Blue
+                </button>
+              </div>
             </div>
           )}
 
@@ -266,7 +293,7 @@ export default function GameSetup({ onStart }: GameSetupProps) {
 
           {/* Start Button */}
           <button
-            onClick={() => onStart(mode, difficulty)}
+            onClick={() => onStart(mode, difficulty, humanColor)}
             className="w-full py-4 rounded-2xl bg-gradient-to-r from-red-800 to-red-900 text-white font-bold text-lg tracking-wide hover:from-red-900 hover:to-red-950 transition-all duration-200 shadow-lg shadow-red-900/25 hover:shadow-xl active:scale-[0.98] mt-2"
           >
             Begin Match

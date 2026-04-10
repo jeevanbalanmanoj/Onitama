@@ -1,73 +1,89 @@
-# React + TypeScript + Vite
+# Onitama
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A digital implementation of the board game **Onitama** built with React, TypeScript, and Vite.
 
-Currently, two official plugins are available:
+![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
+![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&logoColor=white)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## About the Game
 
-## React Compiler
+Onitama is a two-player abstract strategy game created by Shimpei Sato. It's played on a 5×5 board where each player controls a **Master** and four **Students**. The game combines the elegance of chess with a unique card-based movement system that changes every game.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Rules
 
-## Expanding the ESLint configuration
+### Setup
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Each player starts with 5 pieces on their back row: 4 Students and 1 Master (center).
+- **Red** starts on the bottom row, **Blue** on the top row.
+- The center square on each player's back row is their **Temple** (shrine).
+- 5 movement cards are randomly dealt: 2 to each player and 1 neutral card in the middle. The neutral card's color determines who goes first.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### How to Play
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+1. **Select a card** from your hand.
+2. **Select one of your pieces** (Master or Student).
+3. **Move it** to a valid square according to the card's movement pattern.
+4. The card you used swaps with the neutral card — your opponent will eventually get it.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Movement cards show a 5×5 grid where the center is your piece's current position and the highlighted squares are where it can move. Offsets are mirrored for the opposite player.
+
+### Winning
+
+There are two ways to win:
+
+- **Way of the Stone** — Capture your opponent's Master.
+- **Way of the Stream** — Move your own Master onto your opponent's Temple square.
+
+### Passing
+
+If neither of your cards produces a legal move, you must **pass** by choosing a card to swap with the neutral card (without moving any piece).
+
+## Features
+
+- Local PvP (two players on the same device)
+- vs AI with three difficulty levels (Easy, Medium, Hard)
+- AI uses minimax with alpha-beta pruning
+- Animated piece movement (Motion library)
+- Undo support
+- Move log with algebraic notation (a1–e5)
+- 16 unique movement cards
+- Torii gate shrine markers on temple squares
+
+## Tech Stack
+
+- **Vite** — Build tool & dev server
+- **React 19** — UI framework
+- **TypeScript** — Type safety
+- **Tailwind CSS v4** — Styling
+- **Motion** — Animations
+
+## Getting Started
+
+```bash
+# Install dependencies
+npm install
+
+# Start dev server
+npm run dev
+
+# Build for production
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Project Structure
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+├── components/     # React UI components (Board, Square, Cards, etc.)
+├── data/           # Card definitions (16 Onitama cards)
+├── engine/         # Pure game logic & AI (minimax)
+├── hooks/          # useGameState hook (central state management)
+├── types/          # TypeScript type definitions
+└── index.css       # Tailwind CSS entry point
+```
+
+## License
+
+This is a fan-made digital adaptation of Onitama for personal/educational use. Onitama is designed by Shimpei Sato and published by Arcane Wonders.

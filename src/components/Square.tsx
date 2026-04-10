@@ -12,8 +12,8 @@ interface SquareProps {
 }
 
 function isTemple(row: number, col: number): Player | null {
-  if (row === RED_TEMPLE.row && col === RED_TEMPLE.col) return 'red';
-  if (row === BLUE_TEMPLE.row && col === BLUE_TEMPLE.col) return 'blue';
+  if (row === RED_TEMPLE.row && col === RED_TEMPLE.col) return 'blue';
+  if (row === BLUE_TEMPLE.row && col === BLUE_TEMPLE.col) return 'red';
   return null;
 }
 

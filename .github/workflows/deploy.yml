@@ -27,6 +27,8 @@ jobs:
 
       - run: npm ci
       - run: npm run build
+        env:
+          VITE_WS_URL: https://onitama-server.onrender.com
 
       - uses: actions/upload-pages-artifact@v3
         with:

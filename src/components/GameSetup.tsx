@@ -50,9 +50,85 @@ function GlobeIcon({ className }: { className?: string }) {
   );
 }
 
+function BookIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+    </svg>
+  );
+}
+
+function LearnModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={onClose}>
+      <div
+        className="bg-amber-50 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-amber-200/60"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-amber-200/50">
+          <h2 className="text-xl font-bold text-amber-900" style={{ fontFamily: '"Noto Serif JP", serif' }}>
+            How to Play
+          </h2>
+          <button onClick={onClose} className="text-amber-700/50 hover:text-amber-900 text-xl leading-none">✕</button>
+        </div>
+
+        <div className="px-5 py-4 space-y-4 text-sm text-amber-900/80 leading-relaxed">
+          {/* YouTube embed */}
+          <section>
+            <div className="relative w-full rounded-xl overflow-hidden bg-black" style={{ paddingBottom: '56.25%' }}>
+              <iframe
+                className="absolute inset-0 w-full h-full"
+                src="https://www.youtube.com/embed/IFRewjcngwU"
+                title="How to play Onitama"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-amber-900 mb-1">Goal</h3>
+            <p>Win by <strong>capturing your opponent's Master</strong> (king piece) or by moving <strong>your Master onto their Temple</strong> (the marked shrine square).</p>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-amber-900 mb-1">Setup</h3>
+            <p>Each player has <strong>1 Master + 4 Students</strong> on a 5×5 board. Five movement cards are dealt: 2 per player, 1 neutral.</p>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-amber-900 mb-1">On Your Turn</h3>
+            <ol className="list-decimal list-inside space-y-1">
+              <li>Pick one of your two cards.</li>
+              <li>Move any one of your pieces using that card's pattern.</li>
+              <li>Your used card goes to the neutral slot; the old neutral card becomes yours.</li>
+            </ol>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-amber-900 mb-1">Movement</h3>
+            <p>Each card shows a pattern of squares relative to the piece. You can land on empty squares or <strong>capture</strong> an opponent's piece. You cannot land on your own pieces or move off the board.</p>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-amber-900 mb-1">Winning</h3>
+            <ul className="list-disc list-inside space-y-1">
+              <li><strong>Way of the Stone</strong> — Capture the opponent's Master.</li>
+              <li><strong>Way of the Stream</strong> — Move your Master to the opponent's Temple square.</li>
+            </ul>
+          </section>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function GameSetup({ onStart }: GameSetupProps) {
   const [mode, setMode] = useState<GameMode>('ai');
   const [difficulty, setDifficulty] = useState<AIDifficulty>('medium');
+  const [showLearn, setShowLearn] = useState(false);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-seigaiha px-4 relative overflow-hidden">
@@ -111,6 +187,9 @@ export default function GameSetup({ onStart }: GameSetupProps) {
             </p>
             <div className="h-px w-12 bg-amber-800/20" />
           </div>
+          <p className="text-xs text-amber-800/35 mt-2 leading-relaxed">
+            Capture the opponent's Master or move your Master to their Temple
+          </p>
         </div>
 
         {/* Mode Selection — modern toggle-style */}
@@ -194,11 +273,17 @@ export default function GameSetup({ onStart }: GameSetupProps) {
           </button>
         </div>
 
-        {/* Rules hint */}
-        <p className="text-center mt-8 text-xs text-amber-800/30 leading-relaxed">
-          Capture the opponent's Master or move your Master to their Temple
-        </p>
+        {/* Learn to Play */}
+        <button
+          onClick={() => setShowLearn(true)}
+          className="flex items-center justify-center gap-2 mx-auto mt-6 px-4 py-2 rounded-xl text-sm text-amber-800/60 hover:text-amber-900 hover:bg-white/40 transition-all duration-200 border border-transparent hover:border-amber-200/50"
+        >
+          <BookIcon className="w-4 h-4" />
+          Learn to Play
+        </button>
       </div>
+
+      {showLearn && <LearnModal onClose={() => setShowLearn(false)} />}
     </div>
   );
 }

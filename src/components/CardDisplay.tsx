@@ -7,6 +7,7 @@ interface CardDisplayProps {
   perspective: Player;
   onClick?: () => void;
   isNeutral?: boolean;
+  flipped?: boolean;
 }
 
 export default function CardDisplay({
@@ -16,10 +17,14 @@ export default function CardDisplay({
   perspective,
   onClick,
   isNeutral = false,
+  flipped = false,
 }: CardDisplayProps) {
   // 5x5 mini-grid. Center is (2,2). Show card movement offsets.
   // If perspective is 'blue', mirror the offsets (negate dr and dc).
-  const mirror = perspective === 'blue' ? -1 : 1;
+  // If flipped, the board is rotated 180° so we invert again.
+  const perspectiveMirror = perspective === 'blue' ? -1 : 1;
+  const flipMirror = flipped ? -1 : 1;
+  const mirror = perspectiveMirror * flipMirror;
 
   const grid = Array.from({ length: 5 }, (_, r) =>
     Array.from({ length: 5 }, (_, c) => {

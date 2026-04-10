@@ -7,9 +7,10 @@ interface CardHandProps {
   selectedCardName: string | null;
   isActive: boolean;
   onSelectCard: (card: Card) => void;
+  flipped?: boolean;
 }
 
-export default function CardHand({ cards, player, selectedCardName, isActive, onSelectCard }: CardHandProps) {
+export default function CardHand({ cards, player, selectedCardName, isActive, onSelectCard, flipped = false }: CardHandProps) {
   return (
     <div className="flex gap-2 items-center">
       {cards.map((card) => (
@@ -20,6 +21,7 @@ export default function CardHand({ cards, player, selectedCardName, isActive, on
           isPlayable={isActive}
           perspective={player}
           onClick={() => isActive && onSelectCard(card)}
+          flipped={flipped}
         />
       ))}
     </div>

@@ -35,6 +35,7 @@ export default function CardPanel({
           selectedCardName={currentPlayer === topPlayer ? selectedCardName : null}
           isActive={isPlayerTurn(topPlayer)}
           onSelectCard={onSelectCard}
+          flipped={flipped}
         />
       </div>
 
@@ -49,6 +50,7 @@ export default function CardPanel({
           isPlayable={false}
           perspective={currentPlayer}
           isNeutral
+          flipped={flipped}
         />
       </div>
 
@@ -63,6 +65,7 @@ export default function CardPanel({
           selectedCardName={currentPlayer === bottomPlayer ? selectedCardName : null}
           isActive={isPlayerTurn(bottomPlayer)}
           onSelectCard={onSelectCard}
+          flipped={flipped}
         />
       </div>
     </div>

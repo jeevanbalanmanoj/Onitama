@@ -229,17 +229,30 @@ export default function GameSetup({ onStart }: GameSetupProps) {
                 </button>
               ))}
               <div className="w-px bg-amber-200/50 mx-0.5" />
-              <button
-                onClick={() => setHumanColor(humanColor === 'red' ? 'blue' : 'red')}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl font-medium text-xs transition-all duration-200 border whitespace-nowrap ${
-                  humanColor === 'red'
-                    ? 'bg-red-700 text-white border-red-700 shadow-md'
-                    : 'bg-blue-700 text-white border-blue-700 shadow-md'
-                }`}
-              >
-                <span className={`w-2.5 h-2.5 rounded-full ${humanColor === 'red' ? 'bg-red-300' : 'bg-blue-300'}`} />
-                Play as {humanColor === 'red' ? 'Red' : 'Blue'}
-              </button>
+              <div className="flex rounded-xl overflow-hidden border border-amber-200/50 shadow-md">
+                <button
+                  onClick={() => setHumanColor('red')}
+                  className={`flex items-center gap-1.5 px-2.5 py-2 font-medium text-xs transition-all duration-200 whitespace-nowrap ${
+                    humanColor === 'red'
+                      ? 'bg-red-700 text-white'
+                      : 'bg-white/40 text-amber-800 hover:bg-white/60'
+                  }`}
+                >
+                  <span className={`w-2.5 h-2.5 rounded-full ${humanColor === 'red' ? 'bg-red-300' : 'bg-red-400/60'}`} />
+                  Red
+                </button>
+                <button
+                  onClick={() => setHumanColor('blue')}
+                  className={`flex items-center gap-1.5 px-2.5 py-2 font-medium text-xs transition-all duration-200 whitespace-nowrap ${
+                    humanColor === 'blue'
+                      ? 'bg-blue-700 text-white'
+                      : 'bg-white/40 text-amber-800 hover:bg-white/60'
+                  }`}
+                >
+                  <span className={`w-2.5 h-2.5 rounded-full ${humanColor === 'blue' ? 'bg-blue-300' : 'bg-blue-400/60'}`} />
+                  Blue
+                </button>
+              </div>
             </div>
           )}
 

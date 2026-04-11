@@ -158,16 +158,25 @@ io.on('connection', (socket) => {
     }
 
     // If there's a disconnected player, replace them with this socket
-    if (room.disconnectedPlayer && room.players.length === 2) {
+    // (regardless of room.players.length — handles creator reconnecting
+    // to their own 1-player room with a new socket ID)
+    if (room.disconnectedPlayer) {
       const oldId = room.disconnectedPlayer;
       replacePlayer(room, oldId, socket.id);
       socket.join(room.code);
-      socket.to(room.code).emit('opponent_reconnected');
+      // Only notify opponent if there IS another player
+      if (room.players.length === 2) {
+        socket.to(room.code).emit('opponent_reconnected');
+      }
       console.log(`Player ${socket.id} replaced ${oldId} in room ${room.code}`);
+      // If room still has only 1 player (creator reconnected), keep waiting
+      if (room.players.length < 2) {
+        socket.emit('waiting_for_opponent');
+      }
       return;
     }
 
-    // If room has space, treat as a normal join
+    // If room has space and no one is disconnected, treat as a normal join
     if (room.players.length < 2) {
       const joined = joinRoom(roomCode, socket.id);
       if (!joined) {

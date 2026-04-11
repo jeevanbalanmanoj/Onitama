@@ -227,19 +227,18 @@ export function useOnlineGame(): OnlineGameStore {
     };
   }, []);
 
-  // Mobile: force reconnect when tab returns to foreground.
+  // Mobile: reconnect when tab returns to foreground.
   // iOS Safari and Android Chrome silently kill WebSocket connections
   // when backgrounded without firing a 'disconnect' event.
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && socketRef.current) {
         if (socketRef.current.disconnected) {
+          // Actually disconnected — reconnect
           socketRef.current.connect();
-        } else {
-          // Socket thinks it's connected but the server may have dropped it.
-          // Force a reconnect cycle to re-establish a live connection.
-          socketRef.current.disconnect().connect();
         }
+        // If socket thinks it's connected, leave it alone.
+        // Socket.IO's built-in heartbeat/ping will detect stale connections.
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);

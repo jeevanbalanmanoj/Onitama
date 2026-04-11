@@ -83,10 +83,10 @@ export default function App() {
     };
 
     return (
-      <div className="h-screen bg-seigaiha flex flex-col overflow-hidden">
+      <div className="h-dvh bg-seigaiha flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex items-center justify-between px-4 py-2 border-b border-amber-200/50 bg-white/30 backdrop-blur-sm">
-          <h1 className="text-2xl font-bold text-amber-900 tracking-wide">
+        <header className="flex items-center justify-between px-3 py-1.5 md:px-4 md:py-2 border-b border-amber-200/50 bg-white/30 backdrop-blur-sm shrink-0">
+          <h1 className="text-lg md:text-2xl font-bold text-amber-900 tracking-wide">
             Onitama
           </h1>
           <div className="flex items-center gap-3">
@@ -122,12 +122,12 @@ export default function App() {
         )}
 
         {/* Main game area */}
-        <main className="flex-1 flex items-center justify-center p-2 min-h-0">
+        <main className="flex-1 flex items-start md:items-center justify-center p-1 md:p-2 min-h-0 overflow-y-auto">
           <div className="relative">
             {/* Center column: opponent cards → board → player cards */}
-            <div className="flex flex-col items-center gap-1 w-full max-w-[460px]">
+            <div className="flex flex-col items-center gap-0.5 md:gap-1 w-full max-w-[460px]">
               {/* Top player's cards */}
-              <div className="flex flex-col items-center gap-0.5 w-full">
+              <div className="flex flex-col items-center gap-0 md:gap-0.5 w-full">
                 <span className={`text-[10px] font-medium uppercase tracking-wider ${onlineTopPlayer === 'blue' ? 'text-blue-700/70' : 'text-red-700/70'}`}>
                   {onlineTopPlayer === 'blue' ? 'Blue' : 'Red'} {gs.currentPlayer === onlineTopPlayer ? '• Turn' : ''}
                 </span>
@@ -151,9 +151,9 @@ export default function App() {
               />
 
               {/* Neutral card — inline on mobile, hidden on md+ (shown absolutely instead) */}
-              <div className="flex md:hidden items-center justify-center gap-2 w-full">
-                <span className="text-[10px] font-medium text-amber-700/50 uppercase tracking-wider">Next</span>
-                <div className="w-20">
+              <div className="flex md:hidden items-center justify-center gap-1.5 w-full py-0.5">
+                <span className="text-[9px] font-medium text-amber-700/50 uppercase tracking-wider">Next</span>
+                <div className="w-16">
                   <CardDisplay
                     card={gs.neutralCard}
                     isSelected={false}
@@ -184,7 +184,7 @@ export default function App() {
               )}
 
               {/* Bottom player's cards */}
-              <div className="flex flex-col items-center gap-0.5 w-full">
+              <div className="flex flex-col items-center gap-0 md:gap-0.5 w-full">
                 <CardHand
                   cards={onlineBottomPlayer === 'red' ? gs.redCards : gs.blueCards}
                   player={onlineBottomPlayer}
@@ -280,10 +280,10 @@ export default function App() {
   const localBottomPlayer: Player = localFlipped ? 'blue' : 'red';
 
   return (
-    <div className="h-screen bg-seigaiha flex flex-col overflow-hidden">
+    <div className="h-dvh bg-seigaiha flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-2 border-b border-amber-200/50 bg-white/30 backdrop-blur-sm">
-        <h1 className="text-2xl font-bold text-amber-900 tracking-wide">
+      <header className="flex items-center justify-between px-3 py-1.5 md:px-4 md:py-2 border-b border-amber-200/50 bg-white/30 backdrop-blur-sm shrink-0">
+        <h1 className="text-lg md:text-2xl font-bold text-amber-900 tracking-wide">
           Onitama
         </h1>
         <div className="flex items-center gap-3">
@@ -320,12 +320,12 @@ export default function App() {
       </header>
 
       {/* Main game area */}
-      <main className="flex-1 flex items-center justify-center p-2 min-h-0">
+      <main className="flex-1 flex items-start md:items-center justify-center p-1 md:p-2 min-h-0 overflow-y-auto">
         <div className="relative">
           {/* Center column: opponent cards → board → player cards */}
-          <div className="flex flex-col items-center gap-1 w-full max-w-[460px]">
+          <div className="flex flex-col items-center gap-0.5 md:gap-1 w-full max-w-[460px]">
             {/* Top player's cards */}
-            <div className="flex flex-col items-center gap-0.5 w-full">
+            <div className="flex flex-col items-center gap-0 md:gap-0.5 w-full">
               <span className={`text-[10px] font-medium uppercase tracking-wider ${localTopPlayer === 'blue' ? 'text-blue-700/70' : 'text-red-700/70'}`}>
                 {localTopPlayer === 'blue' ? 'Blue' : 'Red'} {gameState.currentPlayer === localTopPlayer ? '• Turn' : ''}
               </span>
@@ -349,9 +349,9 @@ export default function App() {
             />
 
             {/* Neutral card — inline on mobile, hidden on md+ (shown absolutely instead) */}
-            <div className="flex md:hidden items-center justify-center gap-2 w-full">
-              <span className="text-[10px] font-medium text-amber-700/50 uppercase tracking-wider">Next</span>
-              <div className="w-20">
+            <div className="flex md:hidden items-center justify-center gap-1.5 w-full py-0.5">
+              <span className="text-[9px] font-medium text-amber-700/50 uppercase tracking-wider">Next</span>
+              <div className="w-16">
                 <CardDisplay
                   card={gameState.neutralCard}
                   isSelected={false}
@@ -382,7 +382,7 @@ export default function App() {
             )}
 
             {/* Bottom player's cards */}
-            <div className="flex flex-col items-center gap-0.5 w-full">
+            <div className="flex flex-col items-center gap-0 md:gap-0.5 w-full">
               <CardHand
                 cards={localBottomPlayer === 'red' ? gameState.redCards : gameState.blueCards}
                 player={localBottomPlayer}

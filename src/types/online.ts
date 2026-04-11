@@ -30,6 +30,7 @@ export interface ServerToClientEvents {
   opponent_pass: (data: PassPayload) => void;
   opponent_disconnected: () => void;
   opponent_reconnected: () => void;
+  player_left: () => void;
   room_error: (data: { message: string }) => void;
 }
 
@@ -38,6 +39,7 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   create_room: (data?: { preferredColor?: Player }) => void;
   join_room: (data: { roomCode: string }) => void;
+  rejoin_room: (data: { roomCode: string }) => void;
   move: (data: MovePayload) => void;
   pass: (data: PassPayload) => void;
   rematch: () => void;

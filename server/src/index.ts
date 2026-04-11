@@ -7,7 +7,11 @@ import {
   joinRoom,
   getRoomBySocket,
   getPlayerColor,
+  getRoom,
   removeRoom,
+  removePlayer,
+  replacePlayer,
+  isRoomEmpty,
   rematchRoom,
   cleanupStaleRooms,
 } from './rooms.js';
@@ -32,20 +36,42 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
     ],
     methods: ['GET', 'POST'],
   },
+  connectionStateRecovery: {
+    // Allow recovery within 2 minutes of disconnect
+    maxDisconnectionDuration: 2 * 60 * 1000,
+    // Don't skip middlewares on recovery
+    skipMiddlewares: false,
+  },
 });
 
 // Cleanup stale rooms every 10 minutes
 setInterval(cleanupStaleRooms, 10 * 60 * 1000);
 
 io.on('connection', (socket) => {
-  console.log(`Connected: ${socket.id}`);
+  console.log(`Connected: ${socket.id} (recovered: ${socket.recovered})`);
+
+  // If this is a recovered connection, the socket ID is the same and rooms are auto-rejoined.
+  // Notify opponent that we're back.
+  if (socket.recovered) {
+    const room = getRoomBySocket(socket.id);
+    if (room && room.disconnectedPlayer === socket.id) {
+      room.disconnectedPlayer = null;
+      socket.to(room.code).emit('opponent_reconnected');
+      console.log(`Player ${socket.id} recovered in room ${room.code}`);
+    }
+  }
 
   socket.on('create_room', (data) => {
     // Leave any existing room first
     const existing = getRoomBySocket(socket.id);
     if (existing) {
       socket.leave(existing.code);
-      removeRoom(existing.code);
+      removePlayer(existing, socket.id);
+      if (isRoomEmpty(existing)) {
+        removeRoom(existing.code);
+      } else {
+        io.to(existing.code).emit('player_left');
+      }
     }
 
     const preferredColor = data?.preferredColor === 'blue' ? 'blue' : 'red';
@@ -59,6 +85,27 @@ io.on('connection', (socket) => {
   socket.on('join_room', ({ roomCode }) => {
     if (!roomCode || typeof roomCode !== 'string') {
       socket.emit('room_error', { message: 'Invalid room code' });
+      return;
+    }
+
+    // Check if already in this room (e.g., duplicate join from reconnect)
+    const existingRoom = getRoomBySocket(socket.id);
+    if (existingRoom && existingRoom.code === roomCode.toUpperCase()) {
+      // Already in the room, just re-emit game state if game is in progress
+      if (existingRoom.players.length === 2) {
+        const { deal } = existingRoom;
+        const color = getPlayerColor(existingRoom, socket.id);
+        if (color) {
+          socket.emit('game_start', {
+            roomCode: existingRoom.code,
+            yourColor: color,
+            redCards: deal.redCards,
+            blueCards: deal.blueCards,
+            neutralCard: deal.neutralCard,
+            startingPlayer: deal.startingPlayer,
+          });
+        }
+      }
       return;
     }
 
@@ -85,6 +132,69 @@ io.on('connection', (socket) => {
         startingPlayer: deal.startingPlayer,
       });
     }
+  });
+
+  socket.on('rejoin_room', ({ roomCode }) => {
+    if (!roomCode || typeof roomCode !== 'string') {
+      socket.emit('room_error', { message: 'Invalid room code' });
+      return;
+    }
+
+    const room = getRoom(roomCode);
+    if (!room) {
+      socket.emit('room_error', { message: 'Room no longer exists' });
+      return;
+    }
+
+    // If already in this room (same socket ID), just confirm
+    if (room.players.includes(socket.id)) {
+      socket.join(room.code);
+      if (room.disconnectedPlayer === socket.id) {
+        room.disconnectedPlayer = null;
+      }
+      socket.to(room.code).emit('opponent_reconnected');
+      console.log(`Player ${socket.id} re-confirmed in room ${room.code}`);
+      return;
+    }
+
+    // If there's a disconnected player, replace them with this socket
+    if (room.disconnectedPlayer && room.players.length === 2) {
+      const oldId = room.disconnectedPlayer;
+      replacePlayer(room, oldId, socket.id);
+      socket.join(room.code);
+      socket.to(room.code).emit('opponent_reconnected');
+      console.log(`Player ${socket.id} replaced ${oldId} in room ${room.code}`);
+      return;
+    }
+
+    // If room has space, treat as a normal join
+    if (room.players.length < 2) {
+      const joined = joinRoom(roomCode, socket.id);
+      if (!joined) {
+        socket.emit('room_error', { message: 'Could not rejoin room' });
+        return;
+      }
+      socket.join(room.code);
+      console.log(`Player ${socket.id} joined room ${room.code} via rejoin`);
+
+      // Send game_start to both players
+      const { deal } = room;
+      for (const playerId of room.players) {
+        const color = getPlayerColor(room, playerId);
+        if (!color) continue;
+        io.to(playerId).emit('game_start', {
+          roomCode: room.code,
+          yourColor: color,
+          redCards: deal.redCards,
+          blueCards: deal.blueCards,
+          neutralCard: deal.neutralCard,
+          startingPlayer: deal.startingPlayer,
+        });
+      }
+      return;
+    }
+
+    socket.emit('room_error', { message: 'Room is full' });
   });
 
   socket.on('move', (data) => {
@@ -135,11 +245,19 @@ io.on('connection', (socket) => {
     // Notify the other player
     socket.to(room.code).emit('opponent_disconnected');
 
-    // Remove room after 60 seconds if not reconnected
+    // After timeout: remove the player (not the entire room)
     setTimeout(() => {
       if (room.disconnectedPlayer === socket.id) {
-        removeRoom(room.code);
-        console.log(`Room ${room.code} removed (disconnect timeout)`);
+        removePlayer(room, socket.id);
+
+        if (isRoomEmpty(room)) {
+          removeRoom(room.code);
+          console.log(`Room ${room.code} removed (empty after disconnect timeout)`);
+        } else {
+          // Notify remaining player — room is now joinable again
+          io.to(room.code).emit('player_left');
+          console.log(`Player removed from room ${room.code}, waiting for new opponent`);
+        }
       }
     }, 60_000);
   });

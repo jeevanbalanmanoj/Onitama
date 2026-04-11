@@ -41,7 +41,7 @@ export default function CardDisplay({
       onClick={onClick}
       disabled={!isPlayable}
       className={`
-        flex flex-col items-center gap-1.5 p-2.5 rounded-lg transition-all duration-200
+        flex flex-col items-center gap-0.5 px-2 py-1 w-full rounded-lg transition-all duration-200
         border-2
         ${isNeutral
           ? 'bg-amber-50/60 border-amber-400/40 opacity-70'
@@ -54,7 +54,7 @@ export default function CardDisplay({
       `}
     >
       <span
-        className={`text-xs font-semibold tracking-wide uppercase ${
+        className={`text-[10px] font-semibold tracking-wide uppercase ${
           isNeutral ? 'text-amber-700/60' : 'text-amber-900/80'
         }`}
       >
@@ -65,7 +65,7 @@ export default function CardDisplay({
           <div
             key={i}
             className={`
-              w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-sm
+              w-3.5 h-3.5 rounded-sm
               ${cell.isCenter
                 ? 'bg-amber-800/70'
                 : cell.isMove

@@ -4,7 +4,8 @@ import { useOnlineGame } from './hooks/useOnlineGame';
 import GameSetup from './components/GameSetup';
 import OnlineLobby from './components/OnlineLobby';
 import Board from './components/Board';
-import CardPanel from './components/CardPanel';
+import CardHand from './components/CardHand';
+import CardDisplay from './components/CardDisplay';
 import MoveLog from './components/MoveLog';
 import WinOverlay from './components/WinOverlay';
 import type { Player } from './types';
@@ -30,6 +31,11 @@ export default function App() {
     const params = new URLSearchParams(window.location.search);
     const roomParam = params.get('room');
     if (roomParam && online.lobbyStatus === 'idle') {
+      // Clean the URL to prevent re-triggering on refresh
+      const url = new URL(window.location.href);
+      url.searchParams.delete('room');
+      window.history.replaceState({}, '', url.pathname + url.search);
+
       // Auto-start online mode and join the room
       actions.startGame('online', 'medium');
       online.actions.joinRoom(roomParam);
@@ -67,6 +73,8 @@ export default function App() {
     const isMyTurn = gs.currentPlayer === online.playerColor && !gs.winner;
     const currentCards = gs.currentPlayer === 'red' ? gs.redCards : gs.blueCards;
     const onlineFlipped = online.playerColor === 'blue';
+    const onlineTopPlayer: Player = onlineFlipped ? 'red' : 'blue';
+    const onlineBottomPlayer: Player = onlineFlipped ? 'blue' : 'red';
 
     const isPlayerTurnOnline = (player: Player): boolean => {
       if (gs.winner) return false;
@@ -75,9 +83,9 @@ export default function App() {
     };
 
     return (
-      <div className="min-h-screen bg-seigaiha flex flex-col">
+      <div className="h-screen bg-seigaiha flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex items-center justify-between px-4 py-3 border-b border-amber-200/50 bg-white/30 backdrop-blur-sm">
+        <header className="flex items-center justify-between px-4 py-2 border-b border-amber-200/50 bg-white/30 backdrop-blur-sm">
           <h1 className="text-2xl font-bold text-amber-900 tracking-wide">
             Onitama
           </h1>
@@ -114,9 +122,26 @@ export default function App() {
         )}
 
         {/* Main game area */}
-        <main className="flex-1 flex items-center justify-center p-4">
-          <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 lg:gap-10 max-w-5xl w-full justify-center">
-            <div className="flex flex-col items-center gap-3">
+        <main className="flex-1 flex items-center justify-center p-2 min-h-0">
+          <div className="relative">
+            {/* Center column: opponent cards → board → player cards */}
+            <div className="flex flex-col items-center gap-1 w-full max-w-[460px]">
+              {/* Top player's cards */}
+              <div className="flex flex-col items-center gap-0.5 w-full">
+                <span className={`text-[10px] font-medium uppercase tracking-wider ${onlineTopPlayer === 'blue' ? 'text-blue-700/70' : 'text-red-700/70'}`}>
+                  {onlineTopPlayer === 'blue' ? 'Blue' : 'Red'} {gs.currentPlayer === onlineTopPlayer ? '• Turn' : ''}
+                </span>
+                <CardHand
+                  cards={onlineTopPlayer === 'blue' ? gs.blueCards : gs.redCards}
+                  player={onlineTopPlayer}
+                  selectedCardName={gs.currentPlayer === onlineTopPlayer ? (online.selectedCard?.name ?? null) : null}
+                  isActive={isPlayerTurnOnline(onlineTopPlayer)}
+                  onSelectCard={online.actions.selectCard}
+                  flipped={onlineFlipped}
+                />
+              </div>
+
+              {/* Board */}
               <Board
                 state={gs}
                 selectedPieceIndex={online.selectedPieceIndex}
@@ -142,15 +167,34 @@ export default function App() {
                   </div>
                 </div>
               )}
+
+              {/* Bottom player's cards */}
+              <div className="flex flex-col items-center gap-0.5 w-full">
+                <CardHand
+                  cards={onlineBottomPlayer === 'red' ? gs.redCards : gs.blueCards}
+                  player={onlineBottomPlayer}
+                  selectedCardName={gs.currentPlayer === onlineBottomPlayer ? (online.selectedCard?.name ?? null) : null}
+                  isActive={isPlayerTurnOnline(onlineBottomPlayer)}
+                  onSelectCard={online.actions.selectCard}
+                  flipped={onlineFlipped}
+                />
+                <span className={`text-[10px] font-medium uppercase tracking-wider ${onlineBottomPlayer === 'red' ? 'text-red-700/70' : 'text-blue-700/70'}`}>
+                  {onlineBottomPlayer === 'blue' ? 'Blue' : 'Red'} {gs.currentPlayer === onlineBottomPlayer ? '• Turn' : ''}
+                </span>
+              </div>
             </div>
 
-            <div className="flex flex-col gap-6 min-w-[220px]">
-              <CardPanel
-                state={gs}
-                selectedCardName={online.selectedCard?.name ?? null}
-                currentPlayer={gs.currentPlayer}
-                isPlayerTurn={isPlayerTurnOnline}
-                onSelectCard={online.actions.selectCard}
+            {/* Neutral card on the side — absolutely positioned */}
+            <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 flex flex-col items-center gap-1 w-[120px]">
+              <span className="text-xs font-medium text-amber-700/50 uppercase tracking-wider">
+                Next
+              </span>
+              <CardDisplay
+                card={gs.neutralCard}
+                isSelected={false}
+                isPlayable={false}
+                perspective={gs.currentPlayer}
+                isNeutral
                 flipped={onlineFlipped}
               />
             </div>
@@ -217,10 +261,13 @@ export default function App() {
         ? gameState.currentPlayer === 'blue'
         : false;
 
+  const localTopPlayer: Player = localFlipped ? 'red' : 'blue';
+  const localBottomPlayer: Player = localFlipped ? 'blue' : 'red';
+
   return (
-    <div className="min-h-screen bg-seigaiha flex flex-col">
+    <div className="h-screen bg-seigaiha flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3 border-b border-amber-200/50 bg-white/30 backdrop-blur-sm">
+      <header className="flex items-center justify-between px-4 py-2 border-b border-amber-200/50 bg-white/30 backdrop-blur-sm">
         <h1 className="text-2xl font-bold text-amber-900 tracking-wide">
           Onitama
         </h1>
@@ -258,10 +305,26 @@ export default function App() {
       </header>
 
       {/* Main game area */}
-      <main className="flex-1 flex items-center justify-center p-4">
-        <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 lg:gap-10 max-w-5xl w-full justify-center">
-          {/* Board + pass notice */}
-          <div className="flex flex-col items-center gap-3">
+      <main className="flex-1 flex items-center justify-center p-2 min-h-0">
+        <div className="relative">
+          {/* Center column: opponent cards → board → player cards */}
+          <div className="flex flex-col items-center gap-1 w-full max-w-[460px]">
+            {/* Top player's cards */}
+            <div className="flex flex-col items-center gap-0.5 w-full">
+              <span className={`text-[10px] font-medium uppercase tracking-wider ${localTopPlayer === 'blue' ? 'text-blue-700/70' : 'text-red-700/70'}`}>
+                {localTopPlayer === 'blue' ? 'Blue' : 'Red'} {gameState.currentPlayer === localTopPlayer ? '• Turn' : ''}
+              </span>
+              <CardHand
+                cards={localTopPlayer === 'blue' ? gameState.blueCards : gameState.redCards}
+                player={localTopPlayer}
+                selectedCardName={gameState.currentPlayer === localTopPlayer ? (selectedCard?.name ?? null) : null}
+                isActive={isPlayerTurn(localTopPlayer)}
+                onSelectCard={actions.selectCard}
+                flipped={localFlipped}
+              />
+            </div>
+
+            {/* Board */}
             <Board
               state={gameState}
               selectedPieceIndex={selectedPieceIndex}
@@ -287,16 +350,34 @@ export default function App() {
                 </div>
               </div>
             )}
+
+            {/* Bottom player's cards */}
+            <div className="flex flex-col items-center gap-0.5 w-full">
+              <CardHand
+                cards={localBottomPlayer === 'red' ? gameState.redCards : gameState.blueCards}
+                player={localBottomPlayer}
+                selectedCardName={gameState.currentPlayer === localBottomPlayer ? (selectedCard?.name ?? null) : null}
+                isActive={isPlayerTurn(localBottomPlayer)}
+                onSelectCard={actions.selectCard}
+                flipped={localFlipped}
+              />
+              <span className={`text-[10px] font-medium uppercase tracking-wider ${localBottomPlayer === 'red' ? 'text-red-700/70' : 'text-blue-700/70'}`}>
+                {localBottomPlayer === 'blue' ? 'Blue' : 'Red'} {gameState.currentPlayer === localBottomPlayer ? '• Turn' : ''}
+              </span>
+            </div>
           </div>
 
-          {/* Side panel: Cards */}
-          <div className="flex flex-col gap-6 min-w-[220px]">
-            <CardPanel
-              state={gameState}
-              selectedCardName={selectedCard?.name ?? null}
-              currentPlayer={gameState.currentPlayer}
-              isPlayerTurn={isPlayerTurn}
-              onSelectCard={actions.selectCard}
+          {/* Neutral card on the side — absolutely positioned */}
+          <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 flex flex-col items-center gap-1 w-[120px]">
+            <span className="text-xs font-medium text-amber-700/50 uppercase tracking-wider">
+              Next
+            </span>
+            <CardDisplay
+              card={gameState.neutralCard}
+              isSelected={false}
+              isPlayable={false}
+              perspective={gameState.currentPlayer}
+              isNeutral
               flipped={localFlipped}
             />
           </div>

@@ -44,11 +44,17 @@ export function createRoom(creatorSocketId: string, preferredColor: 'red' | 'blu
 export function joinRoom(code: string, joinerSocketId: string): Room | null {
   const room = rooms.get(code.toUpperCase());
   if (!room) return null;
+
+  // If room is "full" but has a disconnected player, evict the ghost
+  if (room.players.length >= 2 && room.disconnectedPlayer) {
+    removePlayer(room, room.disconnectedPlayer);
+  }
+
   if (room.players.length >= 2) return null;
   room.players.push(joinerSocketId);
-  // Assign joiner the opposite color of the creator
-  const creatorColor = room.playerColors.get(room.players[0]) || 'red';
-  room.playerColors.set(joinerSocketId, creatorColor === 'red' ? 'blue' : 'red');
+  // Assign joiner the opposite color of the existing player
+  const existingColor = room.playerColors.get(room.players[0]) || 'red';
+  room.playerColors.set(joinerSocketId, existingColor === 'red' ? 'blue' : 'red');
   return room;
 }
 
@@ -74,6 +80,30 @@ export function getPlayerColor(room: Room, socketId: string): 'red' | 'blue' | n
 export function rematchRoom(room: Room): void {
   room.deal = shuffleAndDeal();
   room.disconnectedPlayer = null;
+}
+
+export function removePlayer(room: Room, socketId: string): void {
+  room.players = room.players.filter(id => id !== socketId);
+  room.playerColors.delete(socketId);
+  if (room.disconnectedPlayer === socketId) {
+    room.disconnectedPlayer = null;
+  }
+}
+
+export function isRoomEmpty(room: Room): boolean {
+  return room.players.length === 0;
+}
+
+export function replacePlayer(room: Room, oldSocketId: string, newSocketId: string): void {
+  const color = room.playerColors.get(oldSocketId);
+  room.players = room.players.map(id => id === oldSocketId ? newSocketId : id);
+  room.playerColors.delete(oldSocketId);
+  if (color) {
+    room.playerColors.set(newSocketId, color);
+  }
+  if (room.disconnectedPlayer === oldSocketId) {
+    room.disconnectedPlayer = null;
+  }
 }
 
 // Clean up stale rooms older than 1 hour

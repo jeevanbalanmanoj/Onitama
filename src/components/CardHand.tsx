@@ -12,7 +12,7 @@ interface CardHandProps {
 
 export default function CardHand({ cards, player, selectedCardName, isActive, onSelectCard, flipped = false }: CardHandProps) {
   return (
-    <div className="flex gap-2 items-center">
+    <div className="grid grid-cols-2 gap-2 w-full pl-6">
       {cards.map((card) => (
         <CardDisplay
           key={card.name}

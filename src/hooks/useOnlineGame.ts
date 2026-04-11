@@ -76,6 +76,8 @@ export interface OnlineGameStore {
 
 export function useOnlineGame(): OnlineGameStore {
   const socketRef = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
+  const roomCodeRef = useRef<string | null>(null);
+  const hasConnectedOnce = useRef(false);
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [selectedPieceIndex, setSelectedPieceIndex] = useState<number | null>(null);
@@ -109,13 +111,39 @@ export function useOnlineGame(): OnlineGameStore {
 
     const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(WS_URL, {
       transports: ['websocket', 'polling'],
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      timeout: 10000,
     });
 
-    socket.on('connect', () => setConnectionStatus('connected'));
+    socket.on('connect', () => {
+      setConnectionStatus('connected');
+      // Only rejoin on actual reconnects, not the first connect
+      // (the first connect has a join_room/create_room emit already queued)
+      if (hasConnectedOnce.current) {
+        const code = roomCodeRef.current;
+        if (code) {
+          socket.emit('rejoin_room', { roomCode: code });
+        }
+      }
+      hasConnectedOnce.current = true;
+    });
+
     socket.on('disconnect', () => setConnectionStatus('disconnected'));
+
+    socket.on('connect_error', () => {
+      setConnectionStatus('disconnected');
+      // Only show error if we were trying to join/create, not on routine reconnect attempts
+      if (!roomCodeRef.current) {
+        setErrorMessage('Unable to connect to server. Please try again.');
+        setLobbyStatus('error');
+      }
+    });
 
     socket.on('room_created', ({ roomCode: code }) => {
       setRoomCode(code);
+      roomCodeRef.current = code;
       setLobbyStatus('waiting');
     });
 
@@ -126,6 +154,7 @@ export function useOnlineGame(): OnlineGameStore {
     socket.on('game_start', (data) => {
       setPlayerColor(data.yourColor);
       setRoomCode(data.roomCode);
+      roomCodeRef.current = data.roomCode;
       setLobbyStatus('ready');
       setOpponentDisconnected(false);
       clearSelection();
@@ -169,6 +198,15 @@ export function useOnlineGame(): OnlineGameStore {
       setOpponentDisconnected(false);
     });
 
+    socket.on('player_left', () => {
+      // Opponent's disconnect timed out — they're gone.
+      // Reset to waiting state so the room can accept a new player.
+      setOpponentDisconnected(false);
+      setGameState(null);
+      setLobbyStatus('waiting');
+      clearSelection();
+    });
+
     socket.on('room_error', ({ message }) => {
       setErrorMessage(message);
       setLobbyStatus('error');
@@ -189,6 +227,25 @@ export function useOnlineGame(): OnlineGameStore {
     };
   }, []);
 
+  // Mobile: force reconnect when tab returns to foreground.
+  // iOS Safari and Android Chrome silently kill WebSocket connections
+  // when backgrounded without firing a 'disconnect' event.
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && socketRef.current) {
+        if (socketRef.current.disconnected) {
+          socketRef.current.connect();
+        } else {
+          // Socket thinks it's connected but the server may have dropped it.
+          // Force a reconnect cycle to re-establish a live connection.
+          socketRef.current.disconnect().connect();
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
   const createRoomAction = useCallback((preferredColor?: Player) => {
     setErrorMessage(null);
     setLobbyStatus('creating');
@@ -200,8 +257,12 @@ export function useOnlineGame(): OnlineGameStore {
     (code: string) => {
       setErrorMessage(null);
       setLobbyStatus('joining');
+      const upperCode = code.toUpperCase();
+      // Don't set roomCodeRef yet — set it when server confirms via game_start.
+      // Setting it here caused a race: getSocket()'s connect handler would see
+      // the ref and fire rejoin_room, duplicating the join_room emit below.
       const socket = getSocket();
-      socket.emit('join_room', { roomCode: code.toUpperCase() });
+      socket.emit('join_room', { roomCode: upperCode });
     },
     [getSocket],
   );
@@ -320,6 +381,8 @@ export function useOnlineGame(): OnlineGameStore {
       socketRef.current.disconnect();
       socketRef.current = null;
     }
+    roomCodeRef.current = null;
+    hasConnectedOnce.current = false;
     setGameState(null);
     setPlayerColor(null);
     setRoomCode(null);

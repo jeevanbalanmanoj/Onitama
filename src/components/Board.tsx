@@ -25,7 +25,7 @@ export default function Board({ state, selectedPieceIndex, validTargets, onSquar
   const colOrder = flipped ? [4, 3, 2, 1, 0] : [0, 1, 2, 3, 4];
 
   return (
-    <div className="flex flex-col items-center w-full max-w-[400px]">
+    <div className="flex flex-col items-center w-full max-w-[460px]">
       {/* Column labels (top) */}
       <div className="grid grid-cols-5 w-full pl-6 pr-1 mb-0.5">
         {colLabels.map((l) => (

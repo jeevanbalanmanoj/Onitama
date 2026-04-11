@@ -150,6 +150,21 @@ export default function App() {
                 flipped={onlineFlipped}
               />
 
+              {/* Neutral card — inline on mobile, hidden on md+ (shown absolutely instead) */}
+              <div className="flex md:hidden items-center justify-center gap-2 w-full">
+                <span className="text-[10px] font-medium text-amber-700/50 uppercase tracking-wider">Next</span>
+                <div className="w-20">
+                  <CardDisplay
+                    card={gs.neutralCard}
+                    isSelected={false}
+                    isPlayable={false}
+                    perspective={gs.currentPlayer}
+                    isNeutral
+                    flipped={onlineFlipped}
+                  />
+                </div>
+              </div>
+
               {/* Must-pass indicator */}
               {online.mustPass && isMyTurn && (
                 <div className="bg-amber-200/70 border border-amber-400/50 rounded-lg px-4 py-2 text-sm text-amber-900">
@@ -184,8 +199,8 @@ export default function App() {
               </div>
             </div>
 
-            {/* Neutral card on the side — absolutely positioned */}
-            <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 flex flex-col items-center gap-1 w-[120px]">
+            {/* Neutral card on the side — hidden on mobile, shown on md+ */}
+            <div className="hidden md:flex absolute left-full top-1/2 -translate-y-1/2 ml-4 flex-col items-center gap-1 w-[120px]">
               <span className="text-xs font-medium text-amber-700/50 uppercase tracking-wider">
                 Next
               </span>
@@ -333,6 +348,21 @@ export default function App() {
               flipped={localFlipped}
             />
 
+            {/* Neutral card — inline on mobile, hidden on md+ (shown absolutely instead) */}
+            <div className="flex md:hidden items-center justify-center gap-2 w-full">
+              <span className="text-[10px] font-medium text-amber-700/50 uppercase tracking-wider">Next</span>
+              <div className="w-20">
+                <CardDisplay
+                  card={gameState.neutralCard}
+                  isSelected={false}
+                  isPlayable={false}
+                  perspective={gameState.currentPlayer}
+                  isNeutral
+                  flipped={localFlipped}
+                />
+              </div>
+            </div>
+
             {/* Must-pass indicator */}
             {mustPass && (
               <div className="bg-amber-200/70 border border-amber-400/50 rounded-lg px-4 py-2 text-sm text-amber-900">
@@ -367,8 +397,8 @@ export default function App() {
             </div>
           </div>
 
-          {/* Neutral card on the side — absolutely positioned */}
-          <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 flex flex-col items-center gap-1 w-[120px]">
+          {/* Neutral card on the side — hidden on mobile, shown on md+ */}
+          <div className="hidden md:flex absolute left-full top-1/2 -translate-y-1/2 ml-4 flex-col items-center gap-1 w-[120px]">
             <span className="text-xs font-medium text-amber-700/50 uppercase tracking-wider">
               Next
             </span>
